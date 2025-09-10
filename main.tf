@@ -12,6 +12,10 @@ module "vpc" {
   availability_zones    = var.availability_zones
   tags                  = var.tags
   name_prefix           = var.name_prefix
+  enable_dns_hostnames   = var.enable_dns_hostnames
+  enable_dns_support     = var.enable_dns_support
+  public_route_cidr      = var.public_route_cidr
+  private_route_cidr     = var.private_route_cidr
 }
 
 module "security_groups" {
@@ -22,6 +26,7 @@ module "security_groups" {
   nodes_sg_name        = var.nodes_sg_name
   nodes_sg_description = var.nodes_sg_description
   ingress_cp_cidr_blocks = var.ingress_cp_cidr_blocks
+  egress_cidr_blocks       = var.nodes_sg_egress_cidr_blocks
 }
 
 module "iam" {
@@ -75,4 +80,23 @@ module "vpc_endpoints" {
   private_dns_enabled         = var.private_dns_enabled
   endpoints_sg_name           = var.endpoints_sg_name
   endpoints_sg_description    = var.endpoints_sg_description
+  endpoints_ingress_cidr_blocks  = var.endpoints_ingress_cidr_blocks
+  endpoints_egress_cidr_blocks   = var.endpoints_egress_cidr_blocks
+}
+
+# Optional: Bastion Host EC2 instance in a public subnet
+module "bastion" {
+  source                 = "./modules/bastion"
+  enable                 = var.bastion_enable
+  vpc_id                 = module.vpc.vpc_id
+  subnet_id              = module.vpc.public_subnet_ids[0]
+  name_prefix            = var.name_prefix
+  tags                   = var.tags
+  instance_type          = var.bastion_instance_type
+  ami_id                 = var.bastion_ami_id
+  key_name               = var.bastion_key_name
+  allowed_ssh_cidrs      = var.bastion_allowed_ssh_cidrs
+  associate_public_ip    = var.bastion_associate_public_ip
+  ssh_port               = var.bastion_ssh_port
+  egress_cidr_blocks     = var.bastion_egress_cidr_blocks
 }

@@ -185,3 +185,43 @@ variable "endpoints_sg_description" {
   type        = string
   default     = "Security group for VPC Interface Endpoints"
 }
+
+# ----------------------------------------------------------------------------
+# Bastion Host (EC2) configuration
+# ----------------------------------------------------------------------------
+
+variable "bastion_enable" {
+  description = "Whether to create the bastion host"
+  type        = bool
+  default     = true
+}
+
+variable "bastion_instance_type" {
+  description = "EC2 instance type for the bastion host"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "bastion_ami_id" {
+  description = "Optional AMI ID for the bastion host. If empty, the module will use latest Amazon Linux 2"
+  type        = string
+  default     = ""
+}
+
+variable "bastion_key_name" {
+  description = "EC2 key pair name for SSH access to bastion. Leave empty to disable key association"
+  type        = string
+  default     = ""
+}
+
+variable "bastion_allowed_ssh_cidrs" {
+  description = "CIDR blocks allowed to SSH into the bastion (port 22)"
+  type        = list(string)
+  default     = []
+}
+
+variable "bastion_associate_public_ip" {
+  description = "Whether to associate a public IP address with the bastion instance"
+  type        = bool
+  default     = true
+}

@@ -3,11 +3,14 @@ resource "aws_security_group" "nodes" {
   description = var.nodes_sg_description
   vpc_id      = var.vpc_id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "egress" {
+    for_each = var.egress_cidr_blocks
+    content {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = [egress.value]
+    }
   }
 
   # Allow node to node communication within VPC

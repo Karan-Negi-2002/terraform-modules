@@ -89,3 +89,32 @@ interface_vpc_endpoint_type = "Interface"
 private_dns_enabled         = true
 endpoints_sg_name           = "vpc-endpoints-sg"
 endpoints_sg_description    = "Security group for VPC Interface Endpoints"
+
+# Bastion Host (EC2)
+# IMPORTANT: Set your own IP/CIDR in bastion_allowed_ssh_cidrs to securely allow SSH.
+# Example: ["203.0.113.10/32"]
+bastion_enable                = true
+bastion_instance_type         = "t3.micro"
+bastion_ami_id                = ""      # Leave empty to auto-select latest Amazon Linux 2
+bastion_key_name              = ""      # Set to your EC2 key pair name to enable SSH
+bastion_allowed_ssh_cidrs     = []       # e.g., ["YOUR_IP/32"]
+bastion_associate_public_ip   = true
+
+# VPC toggles and routing (previously hardcoded)
+enable_dns_hostnames = true
+enable_dns_support   = true
+public_route_cidr    = "0.0.0.0/0"
+private_route_cidr   = "0.0.0.0/0"
+
+# Nodes Security Group egress CIDRs (previously hardcoded 0.0.0.0/0)
+nodes_sg_egress_cidr_blocks = ["0.0.0.0/0"]
+
+# Interface Endpoints SG tuning
+# Leave endpoints_ingress_cidr_blocks empty to default to vpc_cidr, or set explicitly as below
+# endpoints_ingress_cidr_blocks = ["10.10.0.0/16"]
+endpoints_ingress_cidr_blocks = []
+endpoints_egress_cidr_blocks  = ["0.0.0.0/0"]
+
+# Bastion extras
+bastion_ssh_port            = 22
+bastion_egress_cidr_blocks  = ["0.0.0.0/0"]

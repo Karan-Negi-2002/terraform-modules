@@ -16,11 +16,11 @@ resource "aws_security_group" "endpoints" {
   description = var.endpoints_sg_description
   vpc_id      = var.vpc_id
 
-  # Allow TLS from within VPC
+  # Allow TLS from provided ingress CIDRs or fall back to VPC CIDR
   dynamic "ingress" {
-    for_each = var.vpc_cidr == null ? [] : [var.vpc_cidr]
+    for_each = length(var.endpoints_ingress_cidr_blocks) > 0 ? var.endpoints_ingress_cidr_blocks : (var.vpc_cidr == null ? [] : [var.vpc_cidr])
     content {
-      description = "VPC to Interface Endpoints"
+      description = "VPC/Specified CIDRs to Interface Endpoints"
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
@@ -28,11 +28,14 @@ resource "aws_security_group" "endpoints" {
     }
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "egress" {
+    for_each = var.endpoints_egress_cidr_blocks
+    content {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = [egress.value]
+    }
   }
 
   tags = merge(var.tags, { Name = var.endpoints_sg_name })

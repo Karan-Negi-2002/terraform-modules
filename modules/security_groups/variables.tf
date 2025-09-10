@@ -28,3 +28,9 @@ variable "ingress_cp_cidr_blocks" {
   type        = list(string)
   default     = []
 }
+
+variable "egress_cidr_blocks" {
+  description = "CIDR blocks for nodes SG egress rules"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}

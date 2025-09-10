@@ -51,3 +51,15 @@ variable "endpoints_sg_description" {
   type        = string
   default     = "Security group for VPC Interface Endpoints"
 }
+
+variable "endpoints_ingress_cidr_blocks" {
+  description = "CIDR blocks allowed to reach interface endpoints on 443. If empty, falls back to vpc_cidr when provided."
+  type        = list(string)
+  default     = []
+}
+
+variable "endpoints_egress_cidr_blocks" {
+  description = "CIDR blocks for interface endpoints SG egress"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
