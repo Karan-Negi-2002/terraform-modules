@@ -55,3 +55,37 @@ node_role_policy_arns = [
 
 # VPC Endpoint
 s3_endpoint_name = "s3-gateway-endpoint"
+
+# Advanced EKS endpoint controls and logging
+endpoint_private_access = true
+endpoint_public_access  = false
+public_access_cidrs     = []
+
+enabled_cluster_log_types = [
+  "api",
+  "audit",
+  "authenticator",
+]
+
+# Node group image/SSH options
+ami_type  = "AL2_x86_64"
+ec2_ssh_key = ""    # Set to your key pair name to enable SSH, else leave empty
+node_ssh_source_security_group_ids = []  # e.g., ["sg-xxxxxxxx"] when SSH enabled
+
+# Security Group tuning (control-plane to nodes on 443)
+ingress_cp_cidr_blocks = [
+  "10.10.0.0/16",
+]
+
+# Interface VPC Endpoints (optional)
+interface_endpoints = [
+  "ecr.api",
+  "ecr.dkr",
+  "sts",
+  "logs",
+  "ec2",
+]
+interface_vpc_endpoint_type = "Interface"
+private_dns_enabled         = true
+endpoints_sg_name           = "vpc-endpoints-sg"
+endpoints_sg_description    = "Security group for VPC Interface Endpoints"

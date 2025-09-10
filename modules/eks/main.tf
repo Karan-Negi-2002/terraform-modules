@@ -5,10 +5,13 @@ resource "aws_eks_cluster" "this" {
 
   vpc_config {
     subnet_ids              = var.private_subnet_ids
-    endpoint_public_access  = var.enable_public_endpoint
-    endpoint_private_access = true
+    endpoint_public_access  = var.endpoint_public_access
+    endpoint_private_access = var.endpoint_private_access
+    public_access_cidrs     = var.public_access_cidrs
     security_group_ids      = [var.node_sg_id]
   }
+
+  enabled_cluster_log_types = var.enabled_cluster_log_types
 
   tags = var.tags
 }
@@ -26,6 +29,15 @@ resource "aws_eks_node_group" "this" {
   }
 
   instance_types = var.node_group_instance_types
+  ami_type       = var.ami_type
+
+  dynamic "remote_access" {
+    for_each = length(var.ec2_ssh_key) > 0 && length(var.node_ssh_source_security_group_ids) > 0 ? [1] : []
+    content {
+      ec2_ssh_key               = var.ec2_ssh_key
+      source_security_group_ids = var.node_ssh_source_security_group_ids
+    }
+  }
   tags           = var.tags
 }
 

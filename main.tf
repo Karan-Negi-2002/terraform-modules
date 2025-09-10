@@ -21,6 +21,7 @@ module "security_groups" {
   tags    = var.tags
   nodes_sg_name        = var.nodes_sg_name
   nodes_sg_description = var.nodes_sg_description
+  ingress_cp_cidr_blocks = var.ingress_cp_cidr_blocks
 }
 
 module "iam" {
@@ -48,6 +49,15 @@ module "eks" {
   node_role_arn            = module.iam.node_role_arn
   node_group_name          = var.node_group_name
   enable_public_endpoint   = var.enable_public_endpoint
+  # Advanced endpoint controls
+  endpoint_private_access  = var.endpoint_private_access
+  endpoint_public_access   = var.endpoint_public_access
+  public_access_cidrs      = var.public_access_cidrs
+  enabled_cluster_log_types = var.enabled_cluster_log_types
+  # Node AMI and optional SSH
+  ami_type                 = var.ami_type
+  ec2_ssh_key              = var.ec2_ssh_key
+  node_ssh_source_security_group_ids = var.node_ssh_source_security_group_ids
   tags                     = var.tags
 }
 
@@ -58,4 +68,11 @@ module "vpc_endpoints" {
   route_table_ids = [module.vpc.private_route_table_id]
   tags            = var.tags
   endpoint_name   = var.s3_endpoint_name
+  subnet_ids      = module.vpc.private_subnet_ids
+  vpc_cidr        = var.vpc_cidr
+  interface_endpoints         = var.interface_endpoints
+  interface_vpc_endpoint_type = var.interface_vpc_endpoint_type
+  private_dns_enabled         = var.private_dns_enabled
+  endpoints_sg_name           = var.endpoints_sg_name
+  endpoints_sg_description    = var.endpoints_sg_description
 }

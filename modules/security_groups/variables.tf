@@ -22,3 +22,9 @@ variable "nodes_sg_description" {
   description = "Description for EKS nodes security group"
   type        = string
 }
+
+variable "ingress_cp_cidr_blocks" {
+  description = "List of CIDR blocks allowed to access nodes on control-plane ports (443)"
+  type        = list(string)
+  default     = []
+}

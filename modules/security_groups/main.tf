@@ -19,5 +19,17 @@ resource "aws_security_group" "nodes" {
     cidr_blocks = [var.vpc_cidr]
   }
 
+  # Optional: allow control-plane related traffic to nodes on 443 from provided CIDRs
+  dynamic "ingress" {
+    for_each = var.ingress_cp_cidr_blocks
+    content {
+      description = "Control plane to nodes"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
+  }
+
   tags = merge(var.tags, { Name = var.nodes_sg_name })
 }

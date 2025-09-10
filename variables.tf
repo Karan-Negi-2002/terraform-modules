@@ -101,3 +101,87 @@ variable "s3_endpoint_name" {
   description = "Name tag for S3 VPC endpoint"
   type        = string
 }
+
+# ----------------------------------------------------------------------------
+# Advanced EKS and Networking Options
+# ----------------------------------------------------------------------------
+
+variable "endpoint_private_access" {
+  description = "Whether the EKS API server endpoint is private"
+  type        = bool
+  default     = true
+}
+
+variable "endpoint_public_access" {
+  description = "Whether the EKS API server endpoint is publicly accessible"
+  type        = bool
+  default     = false
+}
+
+variable "public_access_cidrs" {
+  description = "List of CIDR blocks that can access the public EKS endpoint (only used when public access is enabled)"
+  type        = list(string)
+  default     = []
+}
+
+variable "enabled_cluster_log_types" {
+  description = "List of control plane log types to enable, e.g. [\"api\", \"audit\", \"authenticator\", \"controllerManager\", \"scheduler\"]"
+  type        = list(string)
+  default     = []
+}
+
+variable "ami_type" {
+  description = "AMI type for the managed node group (e.g., AL2_x86_64, AL2_x86_64_GPU, BOTTLEROCKET_x86_64, AL2023_x86_64)"
+  type        = string
+  default     = "AL2_x86_64"
+}
+
+variable "ec2_ssh_key" {
+  description = "EC2 key pair name to enable SSH access to worker nodes (remote access in managed nodegroups). Leave empty to disable."
+  type        = string
+  default     = ""
+}
+
+variable "node_ssh_source_security_group_ids" {
+  description = "Security group IDs that are allowed to SSH into nodes when remote access is enabled. Leave empty to skip remote access configuration."
+  type        = list(string)
+  default     = []
+}
+
+# Security Group tuning
+variable "ingress_cp_cidr_blocks" {
+  description = "CIDR blocks allowed to reach node group on control-plane related ports (e.g., 443)"
+  type        = list(string)
+  default     = []
+}
+
+# Interface VPC Endpoints configuration
+variable "interface_endpoints" {
+  description = "List of AWS services to create Interface VPC Endpoints for (short names, e.g., [\"ecr.api\", \"ecr.dkr\", \"sts\"])"
+  type        = list(string)
+  default     = []
+}
+
+variable "interface_vpc_endpoint_type" {
+  description = "Type for interface endpoints (normally 'Interface')"
+  type        = string
+  default     = "Interface"
+}
+
+variable "private_dns_enabled" {
+  description = "Whether to enable private DNS for Interface endpoints"
+  type        = bool
+  default     = true
+}
+
+variable "endpoints_sg_name" {
+  description = "Name for the security group attached to Interface VPC Endpoints"
+  type        = string
+  default     = "vpc-endpoints-sg"
+}
+
+variable "endpoints_sg_description" {
+  description = "Description for the Interface Endpoints security group"
+  type        = string
+  default     = "Security group for VPC Interface Endpoints"
+}
