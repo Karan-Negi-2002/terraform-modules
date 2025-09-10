@@ -1,6 +1,0 @@
-bucket         = "YOUR_S3_BUCKET_NAME"
-key            = "terraform/state/eks-private/terraform.tfstate"
-region         = "us-west-2"
-dynamodb_table = "YOUR_DYNAMODB_TABLE_FOR_LOCKS"
-encrypt        = true
-profile        = "default"

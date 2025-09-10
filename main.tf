@@ -1,58 +1,61 @@
+locals {
+  tags = {
+    Project = var.name_prefix
+  }
+}
+
 module "vpc" {
   source                = "./modules/vpc"
-  cluster_name          = var.cluster_name
   vpc_cidr              = var.vpc_cidr
   public_subnets_cidrs  = var.public_subnets_cidrs
   private_subnets_cidrs = var.private_subnets_cidrs
   availability_zones    = var.availability_zones
-}
-
-module "iam" {
-  source       = "./modules/iam"
-  cluster_name = var.cluster_name
+  tags                  = var.tags
+  name_prefix           = var.name_prefix
 }
 
 module "security_groups" {
-  source       = "./modules/security_groups"
-  cluster_name = var.cluster_name
-  vpc_id       = module.vpc.vpc_id
-  vpc_cidr     = var.vpc_cidr
+  source  = "./modules/security_groups"
+  vpc_id  = module.vpc.vpc_id
+  vpc_cidr = var.vpc_cidr
+  tags    = var.tags
+  nodes_sg_name        = var.nodes_sg_name
+  nodes_sg_description = var.nodes_sg_description
 }
 
-module "vpc_endpoints" {
-  source                 = "./modules/vpc_endpoints"
-  cluster_name           = var.cluster_name
-  aws_region             = var.aws_region
-  vpc_id                 = module.vpc.vpc_id
-  vpc_cidr               = var.vpc_cidr
-  private_subnet_ids     = module.vpc.private_subnet_ids
-  route_table_public_id  = module.vpc.route_table_public_id
-  route_table_private_id = module.vpc.route_table_private_id
+module "iam" {
+  source = "./modules/iam"
+  tags   = var.tags
+  cluster_role_name        = var.cluster_role_name
+  cluster_role_policy_arns = var.cluster_role_policy_arns
+  node_role_name           = var.node_role_name
+  node_role_policy_arns    = var.node_role_policy_arns
 }
 
 module "eks" {
-  source                    = "./modules/eks"
-  cluster_name              = var.cluster_name
-  cluster_version           = var.cluster_version
-  aws_region                = var.aws_region
-  private_subnet_ids        = module.vpc.private_subnet_ids
-  cluster_role_arn          = module.iam.cluster_role_arn
-  node_role_arn             = module.iam.node_role_arn
+  source                   = "./modules/eks"
+  cluster_name             = var.cluster_name
+  cluster_version          = var.cluster_version
+  vpc_id                   = module.vpc.vpc_id
+  private_subnet_ids       = module.vpc.private_subnet_ids
+  public_subnet_ids        = module.vpc.public_subnet_ids
   node_group_instance_types = var.node_group_instance_types
-  node_group_desired        = var.node_group_desired
-  node_group_min            = var.node_group_min
-  node_group_max            = var.node_group_max
+  node_group_desired       = var.node_group_desired
+  node_group_min           = var.node_group_min
+  node_group_max           = var.node_group_max
+  node_sg_id               = module.security_groups.nodes_sg_id
+  cluster_role_arn         = module.iam.cluster_role_arn
+  node_role_arn            = module.iam.node_role_arn
+  node_group_name          = var.node_group_name
+  enable_public_endpoint   = var.enable_public_endpoint
+  tags                     = var.tags
 }
 
-output "cluster_endpoint" {
-  value       = module.eks.cluster_endpoint
-  description = "EKS cluster endpoint (private)"
-}
-
-output "cluster_certificate_authority_data" {
-  value = module.eks.cluster_certificate_authority_data
-}
-
-output "node_group_arn" {
-  value = module.eks.node_group_arn
+# Optional: Create S3 gateway endpoint in private route tables
+module "vpc_endpoints" {
+  source          = "./modules/vpc_endpoints"
+  vpc_id          = module.vpc.vpc_id
+  route_table_ids = [module.vpc.private_route_table_id]
+  tags            = var.tags
+  endpoint_name   = var.s3_endpoint_name
 }

@@ -1,10 +1,4 @@
-resource "aws_iam_role" "karan_eks_cluster" {
-  name               = "${var.cluster_name}-cluster-role"
-  assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
-  tags               = { Name = "${var.cluster_name}-cluster-role" }
-}
-
-data "aws_iam_policy_document" "eks_assume_role" {
+data "aws_iam_policy_document" "eks_cluster_assume" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -14,23 +8,20 @@ data "aws_iam_policy_document" "eks_assume_role" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSClusterPolicy" {
-  role       = aws_iam_role.karan_eks_cluster.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+resource "aws_iam_role" "eks_cluster" {
+  name               = var.cluster_role_name
+  assume_role_policy = data.aws_iam_policy_document.eks_cluster_assume.json
+  tags               = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSServicePolicy" {
-  role       = aws_iam_role.karan_eks_cluster.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+resource "aws_iam_role_policy_attachment" "eks_cluster_policies" {
+  for_each = toset(var.cluster_role_policy_arns)
+  role       = aws_iam_role.eks_cluster.name
+  policy_arn = each.key
 }
 
-resource "aws_iam_role" "karan_node_group" {
-  name               = "${var.cluster_name}-node-role"
-  assume_role_policy = data.aws_iam_policy_document.node_assume_role.json
-  tags               = { Name = "${var.cluster_name}-node-role" }
-}
-
-data "aws_iam_policy_document" "node_assume_role" {
+# Node group role
+data "aws_iam_policy_document" "eks_nodes_assume" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -40,22 +31,22 @@ data "aws_iam_policy_document" "node_assume_role" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "node_AmazonEKSWorkerNodePolicy" {
-  role       = aws_iam_role.karan_node_group.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+resource "aws_iam_role" "eks_nodes" {
+  name               = var.node_role_name
+  assume_role_policy = data.aws_iam_policy_document.eks_nodes_assume.json
+  tags               = var.tags
 }
 
-resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOnly" {
-  role       = aws_iam_role.karan_node_group.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+resource "aws_iam_role_policy_attachment" "eks_nodes_policies" {
+  for_each = toset(var.node_role_policy_arns)
+  role       = aws_iam_role.eks_nodes.name
+  policy_arn = each.key
 }
 
-resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
-  role       = aws_iam_role.karan_node_group.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+output "cluster_role_arn" {
+  value = aws_iam_role.eks_cluster.arn
 }
 
-resource "aws_iam_role_policy_attachment" "node_AmazonSSMManagedInstanceCore" {
-  role       = aws_iam_role.karan_node_group.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+output "node_role_arn" {
+  value = aws_iam_role.eks_nodes.arn
 }

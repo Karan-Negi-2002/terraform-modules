@@ -1,54 +1,103 @@
 variable "aws_region" {
-  type    = string
-  default = "us-west-2" # change as needed
+  type = string
 }
 
 variable "cluster_name" {
-  type    = string
-  default = "karan-private-eks-cluster"
+  type = string
 }
 
 variable "vpc_cidr" {
-  type    = string
-  default = "10.10.0.0/16"
+  type = string
 }
 
 variable "public_subnets_cidrs" {
-  type    = list(string)
-  default = ["10.10.1.0/24", "10.10.2.0/24"]
+  type = list(string)
 }
 
 variable "private_subnets_cidrs" {
-  type    = list(string)
-  default = ["10.10.11.0/24", "10.10.12.0/24"]
+  type = list(string)
 }
 
 variable "availability_zones" {
-  type    = list(string)
-  default = [] # default empty = auto-pick from data source
+  type = list(string)
 }
 
 variable "node_group_instance_types" {
-  type    = list(string)
-  default = ["t2.medium"]
+  type = list(string)
 }
 
 variable "node_group_desired" {
-  type    = number
-  default = 2
+  type = number
 }
 
 variable "node_group_min" {
-  type    = number
-  default = 1
+  type = number
 }
 
 variable "node_group_max" {
-  type    = number
-  default = 3
+  type = number
 }
 
 variable "cluster_version" {
-  type    = string
-  default = "1.28"
+  type = string
+}
+
+# New variables to avoid hardcoded values anywhere
+variable "tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+}
+
+variable "name_prefix" {
+  description = "Prefix used for naming resources"
+  type        = string
+}
+
+# Security Groups module variables
+variable "nodes_sg_name" {
+  description = "Name for EKS nodes security group"
+  type        = string
+}
+
+variable "nodes_sg_description" {
+  description = "Description for EKS nodes security group"
+  type        = string
+}
+
+# IAM module variables
+variable "cluster_role_name" {
+  description = "Name of the EKS cluster IAM role"
+  type        = string
+}
+
+variable "cluster_role_policy_arns" {
+  description = "List of policy ARNs to attach to the cluster role"
+  type        = list(string)
+}
+
+variable "node_role_name" {
+  description = "Name of the EKS nodegroup IAM role"
+  type        = string
+}
+
+variable "node_role_policy_arns" {
+  description = "List of policy ARNs to attach to the node role"
+  type        = list(string)
+}
+
+# EKS module variables
+variable "node_group_name" {
+  description = "Name for the EKS managed node group"
+  type        = string
+}
+
+variable "enable_public_endpoint" {
+  description = "Whether to enable public endpoint for EKS control plane"
+  type        = bool
+}
+
+# VPC Endpoints module variables
+variable "s3_endpoint_name" {
+  description = "Name tag for S3 VPC endpoint"
+  type        = string
 }

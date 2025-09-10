@@ -1,22 +1,21 @@
 resource "aws_eks_cluster" "this" {
   name     = var.cluster_name
-  version  = var.cluster_version
   role_arn = var.cluster_role_arn
+  version  = var.cluster_version
 
   vpc_config {
     subnet_ids              = var.private_subnet_ids
+    endpoint_public_access  = var.enable_public_endpoint
     endpoint_private_access = true
-    endpoint_public_access  = false
-    public_access_cidrs     = []
+    security_group_ids      = [var.node_sg_id]
   }
 
-  enabled_cluster_log_types = ["api", "audit", "authenticator"]
-  tags                      = { Name = var.cluster_name }
+  tags = var.tags
 }
 
-resource "aws_eks_node_group" "managed_nodes" {
+resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${var.cluster_name}-ng"
+  node_group_name = var.node_group_name
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnet_ids
 
@@ -26,23 +25,10 @@ resource "aws_eks_node_group" "managed_nodes" {
     max_size     = var.node_group_max
   }
 
-  ami_type       = "AL2_x86_64"
   instance_types = var.node_group_instance_types
-
-  tags = {
-    Name = "${var.cluster_name}-managed-node"
-  }
-
-  depends_on = [aws_eks_cluster.this]
+  tags           = var.tags
 }
 
-resource "local_file" "kubeconfig" {
-  content = templatefile("${path.module}/kubeconfig.tpl", {
-    cluster_name     = aws_eks_cluster.this.name
-    cluster_endpoint = aws_eks_cluster.this.endpoint
-    ca_data          = aws_eks_cluster.this.certificate_authority[0].data
-    region           = var.aws_region
-  })
-  filename   = "${path.module}/kubeconfig-${var.cluster_name}.yaml"
-  depends_on = [aws_eks_cluster.this]
-}
+output "cluster_name" { value = aws_eks_cluster.this.name }
+output "cluster_endpoint" { value = aws_eks_cluster.this.endpoint }
+output "cluster_certificate_authority" { value = aws_eks_cluster.this.certificate_authority[0].data }

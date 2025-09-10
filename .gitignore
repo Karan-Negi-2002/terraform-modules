@@ -12,6 +12,5 @@ crash.log
 .terraform.lock.hcl
 
 # Kube config / sensitive configs
-kube-config-file-mv-location-cmd
-kubeconfig.tpl
-modules/eks/kubeconfig-*.yaml
+#kube-config-file-mv-location-cmd
+#kubeconfig.tpl
